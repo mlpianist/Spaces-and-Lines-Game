@@ -114,133 +114,153 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
-    <script>
-        let level, numNotes, score, questionNumber, correctPositions, selectedPositions = new Set();
-        const positionToPitch = {
-            1: "e/4", 2: "f/4", 3: "g/4", 4: "a/4", 5: "b/4",
-            6: "c/5", 7: "d/5", 8: "e/5", 9: "f/5"
-        };
+<script>
+    let level, numNotes, score, questionNumber, correctPositions, selectedPositions = new Set();
+    const positionToPitch = {
+        1: "e/4", 2: "f/4", 3: "g/4", 4: "a/4", 5: "b/4",
+        6: "c/5", 7: "d/5", 8: "e/5", 9: "f/5"
+    };
 
-        document.getElementById('level1').addEventListener('click', () => startGame(1));
-        document.getElementById('level2').addEventListener('click', () => startGame(2));
-        document.getElementById('level3').addEventListener('click', () => startGame(3));
+    document.getElementById('level1').addEventListener('click', () => startGame(1));
+    document.getElementById('level2').addEventListener('click', () => startGame(2));
+    document.getElementById('level3').addEventListener('click', () => startGame(3));
 
-        document.getElementById('back-to-main').addEventListener('click', () => {
-            document.getElementById('score-screen').style.display = 'none';
-            document.getElementById('main-screen').style.display = 'block';
-        });
+    document.getElementById('back-to-main').addEventListener('click', () => {
+        document.getElementById('score-screen').style.display = 'none';
+        document.getElementById('main-screen').style.display = 'block';
+    });
 
-        document.querySelectorAll('.position-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const pos = parseInt(btn.dataset.pos);
-                if (selectedPositions.has(pos)) {
-                    selectedPositions.delete(pos);
-                    btn.classList.remove('selected');
-                } else if (selectedPositions.size < numNotes) {
-                    selectedPositions.add(pos);
-                    btn.classList.add('selected');
-                    // Force reflow to ensure color change is rendered
-                    btn.offsetHeight;
-                }
-                if (selectedPositions.size === numNotes) {
-                    setTimeout(() => {
-                        document.getElementById('game-screen').style.display = 'none';
-                        if (arraysEqual([...selectedPositions].sort(), correctPositions.sort())) {
-                            score++;
-                        }
-                        questionNumber++;
-                        if (questionNumber <= 20) {
-                            startQuestion();
-                        } else {
-                            showScore();
-                        }
-                    }, 250);
-                }
-            });
-        });
-
-        function startGame(lvl) {
-            level = lvl;
-            numNotes = level + 1;
-            score = 0;
-            questionNumber = 1;
-            document.getElementById('main-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'none';
-            startQuestion();
-        }
-
-        function drawStaffWithChord(positions) {
-            const vfDiv = document.getElementById('vf');
-            vfDiv.innerHTML = '';
-            const VF = Vex.Flow;
-            const renderer = new VF.Renderer(vfDiv, VF.Renderer.Backends.SVG);
-            renderer.resize(200, 150);
-            const context = renderer.getContext();
-            const stave = new VF.Stave(10, 40, 180);
-            stave.setContext(context).draw();
-            const keys = positions.map(pos => positionToPitch[pos]);
-            const note = new VF.StaveNote({ keys: keys, duration: "q" });
-            const voice = new VF.Voice({ num_beats: 1, beat_value: 4 });
-            voice.addTickables([note]);
-            new VF.Formatter().joinVoices([voice]).format([voice], 160);
-            voice.draw(context, stave);
-        }
-
-        function startQuestion() {
-            correctPositions = getRandomPositions(numNotes);
-            drawStaffWithChord(correctPositions);
-            const gameScreen = document.getElementById('game-screen');
-            const vexflowContainer = document.getElementById('vexflowContainer');
-            const spaceButtons = document.getElementById('space-buttons');
-            const lineButtons = document.getElementById('line-buttons');
-            const questionCounter = document.getElementById('question-counter');
-            gameScreen.style.display = 'block';
-            vexflowContainer.style.display = 'block';
-            vexflowContainer.style.visibility = 'visible';
-            spaceButtons.style.display = 'none';
-            lineButtons.style.display = 'none';
-            questionCounter.style.display = 'none';
-            setTimeout(() => {
-                gameScreen.style.display = 'none';
-                vexflowContainer.style.display = 'none';
-                vexflowContainer.style.visibility = 'hidden';
-                document.getElementById('vf').innerHTML = '';
+    document.querySelectorAll('.position-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const pos = parseInt(btn.dataset.pos);
+            if (selectedPositions.has(pos)) {
+                selectedPositions.delete(pos);
+                btn.classList.remove('selected');
+            } else if (selectedPositions.size < numNotes) {
+                selectedPositions.add(pos);
+                btn.classList.add('selected');
+                btn.offsetHeight;
+            }
+            if (selectedPositions.size === numNotes) {
                 setTimeout(() => {
-                    gameScreen.style.display = 'block';
-                    spaceButtons.style.display = 'grid';
-                    lineButtons.style.display = 'grid';
-                    questionCounter.style.display = 'block';
-                    questionCounter.textContent = `Questions Remaining: ${20 - questionNumber + 1}`;
-                    selectedPositions.clear();
-                    document.querySelectorAll('.position-btn').forEach(btn => btn.classList.remove('selected'));
-                }, 500);
-            }, 2500);
-        }
-
-        function getRandomPositions(k) {
-            const positions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-            for (let i = positions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [positions[i], positions[j]] = [positions[j], positions[i]];
+                    document.getElementById('game-screen').style.display = 'none';
+                    if (arraysEqual([...selectedPositions].sort(), correctPositions.sort())) {
+                        score++;
+                    }
+                    questionNumber++;
+                    if (questionNumber <= 20) {
+                        startQuestion();
+                    } else {
+                        showScore();
+                    }
+                }, 250);
             }
-            return positions.slice(0, k);
-        }
+        });
+    });
 
-        function arraysEqual(a, b) {
-            if (a.length !== b.length) return false;
-            for (let i = 0; i < a.length; i++) {
-                if (a[i] !== b[i]) return false;
-            }
-            return true;
-        }
+    function startGame(lvl) {
+        level = lvl;
+        numNotes = level + 1;  // Level 1 → 2 notes, Level 2 → 3 notes, Level 3 → 4 notes
+        score = 0;
+        questionNumber = 1;
+        document.getElementById('main-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'none';
+        startQuestion();
+    }
 
-        function showScore() {
-            const percentage = (score / 20) * 100;
-            document.getElementById('score').textContent = percentage.toFixed(2);
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('score-screen').style.display = 'block';
+    // NEW: Draw notes consecutively instead of as a chord
+    function drawStaffWithNotes(positions) {
+        const vfDiv = document.getElementById('vf');
+        vfDiv.innerHTML = '';
+        const VF = Vex.Flow;
+        const renderer = new VF.Renderer(vfDiv, VF.Renderer.Backends.SVG);
+        renderer.resize(450, 180);  // Wider to fit up to 4 notes comfortably
+        const context = renderer.getContext();
+
+        const stave = new VF.Stave(10, 40, 410);
+        stave.setContext(context).draw();
+
+        const notes = positions.map(pos => {
+            const note = new VF.StaveNote({
+                keys: [positionToPitch[pos]],
+                duration: "q"
+            });
+            // Optional: nicer stem direction for high notes
+            if (pos >= 6) note.setStemDirection(VF.Stem.DOWN);
+            return note;
+        });
+
+        const voice = new VF.Voice({
+            num_beats: positions.length,
+            beat_value: 4
+        });
+        voice.setStrict(false);
+        voice.addTickables(notes);
+
+        new VF.Formatter().joinVoices([voice]).format([voice], 400);
+        voice.draw(context, stave);
+    }
+
+    function startQuestion() {
+        correctPositions = getRandomPositions(numNotes);
+        drawStaffWithNotes(correctPositions);
+
+        const gameScreen = document.getElementById('game-screen');
+        const vexflowContainer = document.getElementById('vexflowContainer');
+        const spaceButtons = document.getElementById('space-buttons');
+        const lineButtons = document.getElementById('line-buttons');
+        const questionCounter = document.getElementById('question-counter');
+
+        gameScreen.style.display = 'block';
+        vexflowContainer.style.display = 'block';
+        vexflowContainer.style.visibility = 'visible';
+        spaceButtons.style.display = 'none';
+        lineButtons.style.display = 'none';
+        questionCounter.style.display = 'none';
+
+        setTimeout(() => {
+            gameScreen.style.display = 'none';
+            vexflowContainer.style.display = 'none';
+            vexflowContainer.style.visibility = 'hidden';
+            document.getElementById('vf').innerHTML = '';
+
+            setTimeout(() => {
+                gameScreen.style.display = 'block';
+                spaceButtons.style.display = 'grid';
+                lineButtons.style.display = 'grid';
+                questionCounter.style.display = 'block';
+                questionCounter.textContent = `Questions Remaining: ${20 - questionNumber + 1}`;
+                selectedPositions.clear();
+                document.querySelectorAll('.position-btn').forEach(btn => btn.classList.remove('selected'));
+            }, 500);
+        }, 2500);
+    }
+
+    function getRandomPositions(k) {
+        const positions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        for (let i = positions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [positions[i], positions[j]] = [positions[j], positions[i]];
         }
-    </script>
+        return positions.slice(0, k);
+    }
+
+    function arraysEqual(a, b) {
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) return false;
+        }
+        return true;
+    }
+
+    function showScore() {
+        const percentage = (score / 20) * 100;
+        document.getElementById('score').textContent = percentage.toFixed(2);
+        document.getElementById('game-screen').style.display = 'none';
+        document.getElementById('score-screen').style.display = 'block';
+    }
+</script>
 </body>
 </html>
+
 
