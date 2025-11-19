@@ -131,32 +131,39 @@
     });
 
     document.querySelectorAll('.position-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const pos = parseInt(btn.dataset.pos);
-            if (selectedPositions.has(pos)) {
-                selectedPositions.delete(pos);
-                btn.classList.remove('selected');
-            } else if (selectedPositions.size < numNotes) {
-                selectedPositions.add(pos);
-                btn.classList.add('selected');
-                btn.offsetHeight;
-            }
-            if (selectedPositions.size === numNotes) {
-                setTimeout(() => {
-                    document.getElementById('game-screen').style.display = 'none';
-                    if (arraysEqual([...selectedPositions].sort(), correctPositions.sort())) {
-                        score++;
+    btn.addEventListener('click', () => {
+        const pos = parseInt(btn.dataset.pos);
+        if (selectedPositions.has(pos)) return;
+
+        selectedPositions.add(pos);
+        btn.classList.add('selected');
+        btn.offsetHeight;
+
+        if (selectedPositions.size === numNotes) {
+            setTimeout(() => {
+                document.getElementById('game-screen').style.display = 'none';
+
+                const selectedInOrder = [...selectedPositions];
+                let isCorrect = true;
+                for (let i = 0; i < numNotes; i++) {
+                    if (selectedInOrder[i] !== correctPositions[i]) {
+                        isCorrect = false;
+                        break;
                     }
-                    questionNumber++;
-                    if (questionNumber <= 10) {
-                        startQuestion();
-                    } else {
-                        showScore();
-                    }
-                }, 250);
-            }
-        });
+                }
+
+                if (isCorrect) score++;
+
+                questionNumber++;
+                if (questionNumber <= TOTAL_QUESTIONS) {
+                    startQuestion();
+                } else {
+                    showScore();
+                }
+            }, 250);
+        }
     });
+});
 
     function startGame(lvl) {
         level = lvl;
@@ -262,6 +269,7 @@
 </script>
 </body>
 </html>
+
 
 
 
