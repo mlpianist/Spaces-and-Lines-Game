@@ -130,40 +130,54 @@
         document.getElementById('main-screen').style.display = 'block';
     });
 
-    document.querySelectorAll('.position-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const pos = parseInt(btn.dataset.pos);
-        if (selectedPositions.has(pos)) return;
-
-        selectedPositions.add(pos);
-        btn.classList.add('selected');
-        btn.offsetHeight;
-
-        if (selectedPositions.size === numNotes) {
-            setTimeout(() => {
-                document.getElementById('game-screen').style.display = 'none';
-
-                const selectedInOrder = [...selectedPositions];
-                let isCorrect = true;
-                for (let i = 0; i < numNotes; i++) {
-                    if (selectedInOrder[i] !== correctPositions[i]) {
-                        isCorrect = false;
-                        break;
+        document.querySelectorAll('.position-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const pos = parseInt(btn.dataset.pos);
+    
+            // Prevent selecting the same position twice
+            if (selectedPositions.has(pos)) {
+                return; // do nothing if already selected
+            }
+    
+            // Add the position in the order the player clicks
+            selectedPositions.add(pos);
+            btn.classList.add('selected');
+            btn.offsetHeight; // force reflow
+    
+            // Check if we've reached the required number of notes
+            if (selectedPositions.size === numNotes) {
+                setTimeout(() => {
+                    document.getElementById('game-screen').style.display = 'none';
+    
+                    // Convert Set to array to check order
+                    const selectedInOrder = [...selectedPositions];
+    
+                    // Correct order is the order the notes appeared on the staff
+                    const correctInOrder = correctPositions;
+    
+                    // Compare both content AND order
+                    let isCorrect = true;
+                    for (let i = 0; i < numNotes; i++) {
+                        if (selectedInOrder[i] !== correctInOrder[i]) {
+                            isCorrect = false;
+                            break;
+                        }
                     }
-                }
-
-                if (isCorrect) score++;
-
-                questionNumber++;
-                if (questionNumber <= TOTAL_QUESTIONS) {
-                    startQuestion();
-                } else {
-                    showScore();
-                }
-            }, 250);
-        }
+    
+                    if (isCorrect) {
+                        score++;
+                    }
+    
+                    questionNumber++;
+                    if (questionNumber <= TOTAL_QUESTIONS) {
+                        startQuestion();
+                    } else {
+                        showScore();
+                    }
+                }, 250);
+            }
+        });
     });
-});
 
     function startGame(lvl) {
         level = lvl;
@@ -269,6 +283,7 @@
 </script>
 </body>
 </html>
+
 
 
 
